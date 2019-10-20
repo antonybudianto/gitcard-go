@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package protos;
+
+service GithubService {
+  rpc FetchByUsername (GithubRequest) returns (GithubResponse) {}
+}
+
+message GithubRequest {
+  string username = 1;
+}
+
+message GithubResponse {
+  string username = 1;
+  int32 starcount = 2;
+  int32 repocount = 3;
+  int32 forkcount = 4;
+  map<string, int32> langmap = 5;
+}
