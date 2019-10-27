@@ -150,10 +150,25 @@ func handleTopStars(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+func handleTopCompanies(w http.ResponseWriter, r *http.Request) {
+	// Asynchronously check cache and update it when it's necessary
+	cacheJobs <- cacheTypeTopStar
+	data, _ := github.FetchAllCompanies(cacheTopStar)
+	resp := &model.ResponsePayload{
+		Data: data,
+	}
+	b, _ := json.Marshal(resp)
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Gogithub-Cache", "true")
+	w.Write(b)
+	return
+}
+
 func main() {
 	http.HandleFunc("/gh/summary", handleGithubSummary)
 	http.HandleFunc("/gh/profile/", handleGithubProfile)
 	http.HandleFunc("/gh/topstars", handleTopStars)
+	http.HandleFunc("/gh/topcompanies", handleTopCompanies)
 
 	// For testing purpose
 	// http.HandleFunc("/gh/test", handleTest)

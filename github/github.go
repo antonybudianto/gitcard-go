@@ -3,8 +3,10 @@ package github
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"gogithub/config"
 	"net/http"
+	"regexp"
 	"sort"
 )
 
@@ -165,6 +167,7 @@ type SummaryDev struct {
 	Node struct {
 		Login     string `json:"login"`
 		Name      string `json:"name"`
+		Company   string `json:"company"`
 		Following struct {
 			TotalCount int `json:"totalCount"`
 		} `json:"following"`
@@ -223,6 +226,37 @@ func (s byDevStar) Swap(i, j int) {
 }
 func (s byDevStar) Less(i, j int) bool {
 	return s[i].Stars > s[j].Stars
+}
+
+var companies = [...]string{"tokopedia", "bukalapak", "traveloka", "gojek", "kumparan", "salestock", "warungpintar", "dicodingacademy", "kata-ai"}
+
+// FetchAllCompanies - fetch top indonesia dev and map to the predefined companies
+func FetchAllCompanies(cacheTopStar []byte) (map[string][]DevStar, error) {
+	var resp struct {
+		Data  []DevStar `json:"data"`
+		Error string    `json:"string"`
+	}
+	err := json.Unmarshal(cacheTopStar, &resp)
+	if err != nil {
+		return nil, err
+	}
+	var data = resp.Data
+	companyMap := make(map[string][]DevStar)
+MainLoop:
+	for _, v := range data {
+	CompanyLoop:
+		for _, c := range companies {
+			match, err := regexp.MatchString(fmt.Sprintf("%s", c), v.Dev.Node.Company)
+			if err != nil {
+				continue CompanyLoop
+			}
+			if match == true {
+				companyMap[c] = append(companyMap[c], v)
+				continue MainLoop
+			}
+		}
+	}
+	return companyMap, nil
 }
 
 // FetchAllStars - fetch top indonesia dev and their repo to count stars
