@@ -19,8 +19,8 @@ var lastCacheTopStar time.Time
 var cacheJobs chan string
 
 const (
-	cacheHours        = 24
-	cacheHoursTopStar = 24 * 14
+	cacheHours        = 24 * 31
+	cacheHoursTopStar = 24 * 31
 
 	cacheTypeSummary string = "summary"
 	cacheTypeTopStar string = "topstar"
